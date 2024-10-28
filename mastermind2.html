@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gioco Mastermind</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: white;
+            text-align: center;
+            padding: 50px;
+            box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.6); /* Sfondo scuro trasparente */
+            transition: background-color 1s ease; /* Transizione dolce per il colore di sfondo */
+        }
+        #game {
+            background: rgba(0, 123, 255, 0.8); /* Colore blu con trasparenza */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: inline-block;
+            margin-top: 20px;
+        }
+        input {
+            padding: 15px;
+            margin: 10px;
+            width: 220px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        button {
+            padding: 15px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: white;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #risultati {
+            margin-top: 20px;
+            text-align: left;
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        #benvenuto {
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: rgba(255, 193, 7, 0.7);
+            border-radius: 10px;
+        }
+        #messaggio {
+            font-size: 24px;
+            margin: 20px 0;
+            display: none;
+        }
+        p {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gioco Mastermind</h1>
+    <div id="game">
+        <p id="benvenuto">🎉 Benvenuto al gioco! Prova a indovinare il codice nascosto di 4 cifre (da 0 a 9).</p>
+        <input type="text" id="tentativo" placeholder="Inserisci 4 cifre (0-9)" maxlength="4" />
+        <button id="invia">Invia</button>
+        <div id="risultati"></div>
+        <div id="messaggio"></div>
+    </div>
+
+    <script>
+        const codiciColore = [
+            'linear-gradient(to right, #ff7e5f, #feb47b)',  // Arancione sfumato
+            'linear-gradient(to right, #6a11cb, #2575fc)',  // Blu e viola sfumato
+            'linear-gradient(to right, #00c6ff, #0072ff)',  // Blu chiaro a blu scuro
+            'linear-gradient(to right, #ff512f, #dd2476)',  // Rosso e rosa sfumato
+            'linear-gradient(to right, #00c6ff, #f0f0f0)',  // Blu chiaro a bianco
+            'linear-gradient(to right, #ffefba, #ffffff)'   // Giallo a bianco
+        ];
+
+        // Cambia il colore di sfondo randomicamente
+        document.body.style.background = codiciColore[Math.floor(Math.random() * codiciColore.length)];
+
+        const codiceNascosto = Array.from({ length: 4 }, () => Math.floor(Math.random() * 10));
+        let tentativi = 0;
+        const risultatiDiv = document.getElementById('risultati');
+        const maxTentativi = 10; // Numero massimo di tentativi
+        const messaggioDiv = document.getElementById('messaggio');
+
+        document.getElementById('invia').addEventListener('click', () => {
+            const tentativoUtente = document.getElementById('tentativo').value.split('').map(Number);
+
+            // Controlla se l'input è valido
+            if (tentativoUtente.length !== 4 || tentativoUtente.some(cifra => isNaN(cifra) || cifra < 0 || cifra > 9)) {
+                alert("Inserisci esattamente 4 cifre tra 0 e 9.");
+                return;
+            }
+
+            tentativi++;
+            let corretto = 0, erratoPosizione = 0;
+            const codiceNascostoCopia = [...codiceNascosto];
+            const tentativoUtenteCopia = [...tentativoUtente];
+
+            // Logica di verifica
+            for (let i = 0; i < codiceNascosto.length; i++) {
+                if (codiceNascosto[i] === tentativoUtente[i]) {
+                    corretto++;
+                    codiceNascostoCopia[i] = tentativoUtenteCopia[i] = null; // Segna come verificato
+                }
+            }
+
+            for (let cifra of tentativoUtenteCopia) {
+                if (cifra !== null && codiceNascostoCopia.includes(cifra)) {
+                    erratoPosizione++;
+                    codiceNascostoCopia[codiceNascostoCopia.indexOf(cifra)] = null; // Segna come verificato
+                }
+            }
+
+            // Mostra il messaggio
+            if (corretto === 4) {
+                messaggioDiv.innerHTML = `🎉 Congratulazioni! Hai indovinato il codice in ${tentativi} tentativi.`;
+            } else {
+                messaggioDiv.innerHTML = `🤔 Tentativo ${tentativi}: Cifre corrette nella posizione corretta: <strong>${corretto}</strong>, cifre corrette nella posizione errata: <strong>${erratoPosizione}</strong>`;
+            }
+            messaggioDiv.style.display = "block";
+
+            // Se si è raggiunto il numero massimo di tentativi
+            if (tentativi === maxTentativi) {
+                messaggioDiv.innerHTML = `❌ Mi dispiace, hai esaurito i tentativi. Il codice nascosto era: <strong>${codiceNascosto.join('')}</strong>`;
+            }
+
+            // Resetta il campo di input
+            document.getElementById('tentativo').value = '';
+        });
+    </script>
+</body>
+</html>
